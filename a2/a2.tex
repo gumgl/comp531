@@ -1,0 +1,36 @@
+\documentclass{article}
+
+\usepackage{mathtools}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{amsthm}
+\usepackage{xfrac}
+\restylefloat{table}
+
+\author{Guillaume Labranche (260585371)}
+\title{Advanced Theory of Computation (COMP 531)\\Assignment \#2}
+\date{due on 10 February 2016}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\F}{\mathbb{F}}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+
+\begin{document}
+
+\maketitle
+
+\begin{enumerate}
+
+\item Here we assume that by log-space computable functions, we mean functions which can be computed by a log-space transducer, that is a TM with a read-only input tape, a log-space bounded work tape and a write-only output tape.
+
+\begin{proof} In the trivial solution, for any input $x$ to $f \circ\ g$, we first compute $g(x)$ and then run $f$ on $g(x)$'s output tape. Let $n=|x|$. While $g(x)$ requires logarithmic work space, its output may be polynomial. Let $n' = |g(x)| = O(n^k)$. Then $f(g(x))$ requires $O(\log(n^k)) = O(k \log n) = O(\log n)$ work space. Although individually $f$ and $g$ only require logarithmic space, storing $g(x)$ requires polynomial space. Therefore we devise a trick that enables us to compute $f(g(x))$ without storing $g(x)$.
+
+We modify the transducer $F$ for computing $f$ as follows. Whenever $F$ reads the $i$th symbol of its input tape (which contains $g(x)$), it runs the transducer $G$ for $g$ on $x$ until the $i$th symbol is outputted (transducers have a write-only output tape). This can be done using two counters of size $O(\log(n^k))=O(\log n)$ each, one for storing the position on $F$'s input tape and one for keeping track of the number of symbols outputted by $G$. As we can see, $f \circ g$ is still computable in logarithmic space because we do not store $g(x)$, only one character at a time and two counters of logarithmic size.
+\end{proof}
+
+\end{enumerate}
+\end{document}
