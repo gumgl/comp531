@@ -39,7 +39,19 @@ We modify the transducer $F$ for computing $f$ as follows. Whenever $F$ reads th
 \end{proof}
 
 \newpage
-\item \begin{theorem}This algorithm detects a cycle $\iff$ there is a cycle.\end{theorem}
+\item The key intuition here is to realize that the son's future \textbf{and} past behaviour is entirely determined by the current edge (and direction) that he is following. With this insight, we can show that he cannot enter a cycle and get stuck in it unless he was spawned in it by his father. This is then used to show that the son always returns to his initial spawn vertex in finite time. Termination and correctness follow from that quite naturally.
+
+\begin{lemma}\label{lemma_deter}
+Let $(v,w)\in E$, $(u_1,v,w)$ and $(u_2,v,w)$ be two paths followed by the son at some point during the execution of the algorithm. We claim that $u_1=u_2$.
+\end{lemma}
+\begin{proof}
+Let $(v,w)$ be $v$'s $i$th edge. Therefore by the algorithm behaviour, $(u_1,v)$ is $v$'s $(i-1)$th edge. But $(u_2,v)$ is also $v$'s $(i-1)$th edge. Therefore it must be that $u_1=u_2$.
+\end{proof}
+
+\begin{lemma}After being brought to vertex $u$ by his father, the son always returns to $u$ within $2|E|$ time.
+\end{lemma}
+
+\begin{theorem}This algorithm detects a cycle $\iff$ there is a cycle.\end{theorem}
 \begin{proof}
 ($\implies$) Consider the only way that the algorithm detects a cycle: When the son is placed at a vertex $v$, leaves through an edge $(v,u)$ and comes back to $v$ through a different edge $(w,v)$ where $u\not=w$. In this case, there is a path from $v$ to $u$, from $u$ to $w$ and from $w$ to $v$. This forms a cycle.
 
@@ -50,13 +62,13 @@ We modify the transducer $F$ for computing $f$ as follows. Whenever $F$ reads th
 
 $\forall v\in V, \forall (v,u)\in E$, the son follows $(v,u)$ and comes back to $v$ through $(u,v)$. Since $V$ and $E$ are finite, the only way for the algorithm to not be able to evaluate the condition is if the son does not ever come back to $v$. By the pigeonhole principle, since $V$ is finite the son must follow one edge more than once. The son's behaviour at a particular vertex $v$ is solely dependant on the previous visited vertex and the edges of $v$. Since $G$ does not change during the algorithm's runtime, visiting the same edge in the same direction twice will lead to the exact same behaviour and the son will be stuck in a loop. We will show that such a loop cannot exist.
 
-Let $s\in V$ be a vertex where the son was taken to by his father. Assume that there is a loop in the path taken by the son and let $(w,z)\in E$ be the first edge that he visits twice in his path $P=(s,\dotsc,u,w,z,\dotsc,v,w,z,\dotsc)$. Let $(u,w)$ be the $i$th edge of $w$. The index of $(w,z)$ is $i+1$, as per the algorithm description. In the second occurence of $(w,z)$, the son follows the $(i+1)$th edge of $w$. This means that it entered $w$ through $w$'s $i$th edge. Therefore $u=v$ and $(u,w)=(v,w)$ is a repeated edge visited before $(w,z)$, which contradicts our assumption. Therefore there cannot be such a loop in his path and he will eventually return to $s$.
+Let $s\in V$ be a vertex where the son was taken to by his father. Assume that there is a loop in the path taken by the son and let $(v,w)\in E$ be the first edge that he visits twice in his path $P=(s,\dotsc,u_1,v,w,\dotsc,u_2,v,w,\dotsc)$. By lemma \ref{lemma_deter}, $u_1=u_2$ and $(u_1,v)=(u_2,v)$ is a repeated edge visited before $(u,v)$, which contradicts our assumption. Therefore there cannot be such a loop in his path and he will eventually return to $s$.
 %When entering a vertex $u$ of fanout $k$, the son will follow edges $(i+1,i+1,$
 %When following the edge $(v,u)$, the son follows all other edges of $u$ before coming back through $(v,u)$. 
 %The son traverses the graph following the ``cycle searching principle'', starting at every vertex once. Therefore I will show that this principle terminates 
 \end{proof}
 
-The algorithm only needs to store a constant amount of vertex indexes:
+The algorithm only needs to store a constant amount of vertex indices:
 \begin{itemize}
 \item which vertex the father is visiting
 \item which vertex the son visits initially
