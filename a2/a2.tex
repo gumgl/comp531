@@ -33,9 +33,18 @@
 
 \item Here we assume that by log-space computable functions, we mean functions which can be computed by a log-space transducer, that is a TM with a read-only input tape, a log-space bounded work tape and a write-only output tape.
 
-\begin{proof} In the trivial solution, for any input $x$ to $f \circ\ g$, we first compute $g(x)$ and then run $f$ on $g(x)$'s output tape. Let $n=|x|$. While $g(x)$ requires logarithmic work space, its output may be polynomial. Let $n' = |g(x)| = O(n^k)$. Then $f(g(x))$ requires $O(\log(n^k)) = O(k \log n) = O(\log n)$ work space. Although individually $f$ and $g$ only require logarithmic space, storing $g(x)$ requires polynomial space. Therefore we devise a trick that enables us to compute $f(g(x))$ without storing $g(x)$.
+\begin{theorem}If both $f$ and $g$ are computable in logarithmic space, $f \circ g$ is also computable in logarithmic space.
+\end{theorem}
+\begin{proof} In the trivial solution, for any input $x$ to $f \circ\ g$, we first compute $g(x)$ and then run $f$ on $g(x)$'s output tape. Let $n=|x|$. While $g(x)$ requires logarithmic work space, its output may be polynomial (by lemma \ref{lemma_logspace_polynomial}). Let $n' = |g(x)| = O(n^k)$. Then $f(g(x))$ requires $O(\log(n^k)) = O(k \log n) = O(\log n)$ work space. Although individually $f$ and $g$ only require logarithmic space, storing $g(x)$ requires polynomial space. Therefore we devise a trick that enables us to compute $f(g(x))$ without storing $g(x)$.
 
 We modify the transducer $F$ for computing $f$ as follows. Whenever $F$ reads the $i$th symbol of its input tape (which contains $g(x)$), it runs the transducer $G$ for $g$ on $x$ until the $i$th symbol is outputted (transducers have a write-only output tape). This can be done using two counters of size $O(\log(n^k))=O(\log n)$ each, one for storing the position on $F$'s input tape and one for keeping track of the number of symbols outputted by $G$. As we can see, $f \circ g$ is still computable in logarithmic space because we do not store $g(x)$, only one character at a time and two counters of logarithmic size.
+\end{proof}
+
+\begin{lemma}\label{lemma_logspace_polynomial}
+The output of a log-space computable function $f$ is polynomial in the size of its input.
+\end{lemma}
+\begin{proof}
+Assuming that the log-space transducer outputs 1 symbol at every step of its runtime (without loss of generality), by first obtaining a bound on its runtime we can then bound the size of its output. The number of possible configurations is $|Q| \cdot (c \cdot \log_2 n) \cdot 2^{c \cdot \log_2 n} = O(2^{c \cdot \log_2 n}) = O(n^c)$. Since we know that $f$ is computable, the log-space transducer will terminate in finite time. The maximum number of configurations it can be in without looping forever is polynomial, and therefore so is the maximum number of symbols it can write to its output tape.
 \end{proof}
 
 \newpage
