@@ -86,17 +86,16 @@ The algorithm only needs to store a constant amount of vertex indices:
 Therefore the space complexity is $O(\log |V|)$.
 
 \newpage
-\item First we note that the description of a symmetric boolean function $f:\{0,1\}^n\rightarrow \{0,1\}$ is basically a mapping $m:\{0,1,\cdots,n\}\rightarrow \{0,1\}$.
+\item First we note that the description of a symmetric boolean function $f:\{0,1\}^n\rightarrow \{0,1\}$ is basically a mapping $m:\{0,1,\dotsc,n\}\rightarrow \{0,1\}$.
 
-
-Next, we introduce a new type of gate MAJ$_{\geq i}$ constructed from a single MAJ gate that returns 1 when $i$ or more of its $n$ input wires are turned on, and 0 otherwise. To construct it, we feed all $n$ inputs into a MAJ gate. We also add $i-1$ 0-constant inputs and $n-i$ 1-constant inputs for a total of $2n-1$ inputs. Therefore the MAJ gate will output 1 when:
+Next, we introduce a new type of gate MAJ$_{\geq i}$ constructed from a single MAJ gate that returns 1 when $i$ or more of its $n$ input wires are 1, and 0 otherwise. To construct it, we feed all $n$ inputs into a MAJ gate. We also add $i$ 0-constant inputs and $n-i+1$ 1-constant inputs for a total of $2n+1$ inputs. Therefore the MAJ gate will output 1 when:
 \begin{align*}
-\#_1 &> \frac{2n-1}{2} \\
-\#_1 &\geq n \\
-\#_1 &\geq i + (n-i \text{ 1-constants}) \\
-\#_1 &\geq i \text{ [since the constants are fixed once gate is built]}
+\#_1 &> \frac{2n+1}{2} \\
+\#_1 &> n + \sfrac{1}{2} \\
+\#_1 &\geq n + 1 \\
+\#_1 &\geq i + (n-i+1 \text{ 1-constants})
 \end{align*}
-The following diagram illustrates the strategy visually:
+Therefore when ignoring the constants, our MAJ$_{\geq i}$ will return 1 when $i$ or more of its $n$ inputs are 1. The following diagram illustrates the strategy visually:
 
 \includegraphics{q3_maj_geq.pdf}
 
@@ -113,27 +112,29 @@ where $\#_1$ denotes the number of non-constant inputs (i.e. the one that matter
 \end{itemize}
 \end{comment}
 
-We also introduce a similar gate MAJ$_{\leq i}$ that returns 1 if $i$ or less inputs are turned on and 0 otherwise. Its construction is very similar to MAJ$_{\geq i}$ but with negated inputs. Checking whether there are at most $i$ 1s is equivalent to checking whether there are more than $n-i$ 0s. Thus we negate all $n$ inputs and feed them into a MAJ gate. We then add $n-i$ 0-constant inputs and $i+1$ 1-constant inputs so that the MAJ gate has fanin $2n+1$. Therefore the MAJ gate will output 1 when:
+We also introduce a similar gate MAJ$_{\leq i}$ that returns 1 if $i$ or less inputs are 1 and 0 otherwise. Its construction is very similar to MAJ$_{\geq i}$ but with negated inputs. Checking whether there are at most $i$ 1s is equivalent to checking whether there are more than $n-i$ 0s. Thus we negate all $n$ inputs and feed them into a MAJ gate. We then add $n-i$ 0-constant inputs and $i+1$ 1-constant inputs so that the MAJ gate has fanin $2n+1$. Therefore the MAJ gate will output 1 when:
 \begin{align*}
 \#_1 &> \frac{2n+1}{2} \\
 \#_1 &> n + \sfrac{1}{2} \\
-\#_1 &> n + \\
+\#_1 &> n \\
 \#_0 &\leq n \\ 
 \#_0 &\leq i + (n-i \text{ 0-constants})
 \end{align*}
 Since we negated the $n$ inputs, this is equivalent to checking that $$\#_1(\text{original input}) \leq i$$
 
-We then introduce a new type of gate EQ$_i:\{0,1\}^n\rightarrow\{0,1\}\times\{0,1\}$ composed of a MAJ$_{\geq i}$ and a MAJ$_{\leq i}$. On input $w$, it will output $1 \times 1$ if $\#_1(w)=i$, and $1 \times 0$ if $\#_1(w)\not=i$.
+We then introduce a new type of gate EQ$_i:\{0,1\}^n\rightarrow\{0,1\}\times\{0,1\}$ composed of a MAJ$_{\geq i}$ and a MAJ$_{\leq i}$. On input $w$, it will output $(1,1)$ if $\#_1(w)=i$, and $(1,0)$ (or $(0,1)$) if $\#_1(w)\not=i$.
 
 Now to construct a circuit to compute $f$, for all $i$ such that $f(i)=1$, add an EQ$_i$ gate with the same inputs as $f$ at level 1.  At level 2, add a single MAJ gate taking all our level 1 gates as input.
 
 In order to show that this indeed computes $f$, let's perform a case analysis on $f(j)$ for all $0\leq j \leq n$:
 \begin{itemize}
-\item $f(j)=1$: This will make all the EQ$_{i\not=j}$ return $1 \times 0$ or $0 \times 1$ except the gate EQ$_{i=j}$ which will return $1 \times 1$. There will be more 1s than 0s feeding into the level 2 MAJ gate and the circuit will output 1.
+\item $f(j)=1$: This will make all the EQ$_{i\not=j}$ return $(1,0)$ or $(0,1)$ except the gate EQ$_{i=j}$ which will return $(1,1)$. There will be more 1s than 0s feeding into the level 2 MAJ gate and the circuit will output 1.
 
-\item $f(j)=0$: This will result in all EQ gates returning $1 \times 0$ or $0 \times 1$ since no EQ$_{i=j}$ gate has been added to the circuit. Therefore the number of 0s and 1s will be equal and the level 2 MAJ gate will output 0.
+\item $f(j)=0$: This will result in all EQ gates returning $(1,0)$ or $(0,1)$ since no EQ$_{i=j}$ gate has been added to the circuit. Therefore the number of 0s and 1s will be equal and the level 2 MAJ gate will output 0.
 
 \end{itemize}
+
+Note that this also creates a circuit of linear size, since $f(i)=1$ for at most $n$ values and that in each of those cases we add 2 MAJ gates. This completes the construction of a linear-size MAJ $\circ$ MAJ circuit computing a symmetric boolean function. 
 
 \newpage
 \item %todo
