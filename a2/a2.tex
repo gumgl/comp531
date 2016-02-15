@@ -48,7 +48,7 @@ Assuming that the log-space transducer outputs 1 symbol at every step of its run
 \end{proof}
 
 \newpage
-\item The key intuition here is to realize that the son's future \textbf{and} past behaviour is entirely determined by the current edge (and direction) that he is following. With this insight, we can show that he cannot enter a cycle and get stuck in it unless he was spawned in it by his father. This is then used to show that the son always returns to his initial spawn vertex in finite time. Termination and correctness follow from that quite naturally.
+\item The key intuition here is to realize that the son's future \textbf{and} past behaviour is entirely determined by the current edge (and direction) that he is following. With this insight, we can show that he cannot enter a cycle and get stuck in it unless he was spawned in it by his father. This is then used to show that the son always returns to his initial spawn vertex in finite time. Termination follows from that naturally while correctness requires some more detailed case analysis.
 
 \begin{lemma}\label{lemma_deter}
 Let $(v,w)\in E$, $(u_1,v,w)$ and $(u_2,v,w)$ be two paths followed by the son at some point during the execution of the algorithm. We claim that $u_1=u_2$.
@@ -57,24 +57,91 @@ Let $(v,w)\in E$, $(u_1,v,w)$ and $(u_2,v,w)$ be two paths followed by the son a
 Let $(v,w)$ be $v$'s $i$th edge. Therefore by the algorithm behaviour, $(u_1,v)$ is $v$'s $(i-1)$th edge. But $(u_2,v)$ is also $v$'s $(i-1)$th edge. Therefore it must be that $u_1=u_2$.
 \end{proof}
 
-\begin{lemma}After being brought to vertex $u$ by his father, the son always returns to $u$ within $2|E|$ time.
+\begin{lemma}\label{lemma_entercycle}
+If the son is outside outside of a cycle, he cannot enter it.
 \end{lemma}
-
-\begin{theorem}This algorithm detects a cycle $\iff$ there is a cycle.\end{theorem}
 \begin{proof}
-($\implies$) Consider the only way that the algorithm detects a cycle: When the son is placed at a vertex $v$, leaves through an edge $(v,u)$ and comes back to $v$ through a different edge $(w,v)$ where $u\not=w$. In this case, there is a path from $v$ to $u$, from $u$ to $w$ and from $w$ to $v$. This forms a cycle.
-
-($\Longleftarrow$) When following edge $(v,u)$, the son following the ``cycle searching principle'' always visits all the neighbours of $u$ in sequential order before going back through $(u,v)$. Therefore if the node $v$ is the root of a tree (acyclic graph) the son will perform a tree traversal, coming back along an edge only if the subtree has been been entirely visited. In the case that there is a cycle containing $v$, $u$ and $w$ where $(v,u),(v,w)\in E$, the son will eventually be brought to $v$ by his father. The son will leave $v$ through the edge $(v,u)$ and eventually reach $w$. At that point he will re-enter $v$ and the cycle will be detected.
+Consider a cycle $C=(u,v,\dotsc,w,u)$. Assume the son enters the cycle through vertex $u$ and then follows $(u,v)$ without loss of generality. By lemma \ref{lemma_deter}, the son was on vertex $w$ before entering the cycle, which leads to a contradiction since $w \in C$. Either he was in the cycle all along, or he did not enter it.
 \end{proof}
-\begin{theorem}This algorithm terminates in finite time.\end{theorem}
-\begin{proof} (by contradiction) The algorithm evaluates the following condition:
 
+\begin{lemma}\label{lemma_finite}
+After being brought to vertex $u$ by his father, the son always returns to $u$ in finite time.
+\end{lemma}
+\begin{proof} (by contradiction).
+
+Assume the son never returns to $u$. By the pigeonhole principle, since there are only $2|E|$ possible ways to follow any edge ($|E|$ edges and 2 directions), the son must be following the same edge $v$ in the same direction at least twice. By the deterministic nature of the algorithm, he will then follow the exact same path when leaving $v$, creating a forever-repeating sequence of vertices. In other words, the son must be in a cycle. In the case that he was spawned in that cycle (on vertex $u$), since any cycle must have finite length, the son will return to $u$, which contradicts our assumption. It must then be the case that the son was spawned outside of the cycle and later entered it. But lemma \ref{lemma_entercycle} shows that this is not possible. Therefore our assumption cannot be true and the son will return to $u$.
+\end{proof}
+
+\begin{theorem}This algorithm terminates in finite time.\end{theorem}
+\begin{proof} $\forall v\in V, \forall (v,u)\in E$, the son follows $(v,u)$ and by lemma \ref{lemma_finite} comes back to $v$ in finite time. Since $|V|$ and $|E|$ are both finite, the algorithm terminates in finite time.
+
+\begin{comment}
 $\forall v\in V, \forall (v,u)\in E$, the son follows $(v,u)$ and comes back to $v$ through $(u,v)$. Since $V$ and $E$ are finite, the only way for the algorithm to not be able to evaluate the condition is if the son does not ever come back to $v$. By the pigeonhole principle, since $V$ is finite the son must follow one edge more than once. The son's behaviour at a particular vertex $v$ is solely dependant on the previous visited vertex and the edges of $v$. Since $G$ does not change during the algorithm's runtime, visiting the same edge in the same direction twice will lead to the exact same behaviour and the son will be stuck in a loop. We will show that such a loop cannot exist.
 
 Let $s\in V$ be a vertex where the son was taken to by his father. Assume that there is a loop in the path taken by the son and let $(v,w)\in E$ be the first edge that he visits twice in his path $P=(s,\dotsc,u_1,v,w,\dotsc,u_2,v,w,\dotsc)$. By lemma \ref{lemma_deter}, $u_1=u_2$ and $(u_1,v)=(u_2,v)$ is a repeated edge visited before $(u,v)$, which contradicts our assumption. Therefore there cannot be such a loop in his path and he will eventually return to $s$.
 %When entering a vertex $u$ of fanout $k$, the son will follow edges $(i+1,i+1,$
 %When following the edge $(v,u)$, the son follows all other edges of $u$ before coming back through $(v,u)$. 
 %The son traverses the graph following the ``cycle searching principle'', starting at every vertex once. Therefore I will show that this principle terminates 
+\end{comment}
+\end{proof}
+
+\begin{theorem}This algorithm detects a cycle $\iff$ there is a cycle.\end{theorem}
+\begin{proof}
+($\implies$) Consider the only way that the algorithm detects a cycle: When the son is placed at a vertex $v$, leaves through an edge $(v,u)$ and comes back to $v$ through a different edge $(w,v)$ where $u\not=w$. In this case, there is a path from $v$ to $u$, from $u$ to $w$ and from $w$ to $v$. This forms a cycle.
+
+($\Longleftarrow$) Suppose there is a cycle $C$ containing the edge $(u,v)$. Then at some point the father will bring the son to $u$ and send it along the edge of $v$. By lemma \ref{lemma_finite}, the son will always return to $u$. Now consider two cases:
+\begin{itemize}
+\item If the son does not come back through $(u,v)$, the cycle is detected.
+\item If the son does come back through $(u,v)$, then there must be a vertex $w \in C$ such that the son did not enter the successor of $w$ in $C$ (in other words he must have left $C$ at some vertex $w$). Now consider 3 subcases:
+\begin{itemize}
+\item If the son leaves the cycle from $w$ and comes back to $w$ through a different edge, then when the father brings him to $w$ he will detect a cycle.
+\item If the son comes back to $w$ through the same edge, then he will eventually reach the vertex following $w$ in $C$. But that contradicts our definition of $w$ which is supposedly the furthest vertex reached in $C$. Therefore this case is not possible. %That will bring him back to $u$ from the other end of $C$ and the cycle will be detected.
+\item If the son does not come back to $w$, then he must eventually re-enter $C$ through one of the vertices he already visited. Let's call that vertex $z$. When later in the algorithm the father brings the son to $z$ and sends him to the successor of $z$ in $C$ called $z'$, due to the deterministic nature of the algorithm, the son will follow the same path as just described and not return to $z$ through the same edge (since we defined $z$ as the vertex where the son re-enters $C$). At that time, the father will notice the different return edge and detect a cycle.
+\end{itemize}
+\end{itemize}
+
+\begin{figure}[!h]
+\centering
+\begin{tikzpicture}
+\def \n {7}
+\def \radius {2cm}
+\def \margin {10} % margin in angles, depends on the radius
+
+\def \s {5}
+  \node[draw, circle] at ({360/\n * (\s - 1)}:\radius) {$u$};
+\def \s {4}
+  \node[draw, circle] at ({360/\n * (\s - 1)}:\radius) {$v$};
+\def \s {1}
+  \node[draw, circle] at ({360/\n * (\s - 1)}:\radius) {$w$};
+
+
+\def \s {1}
+  \draw[-, >=latex] ({360/\n * (\s - 1)}:\radius + \margin)
+    -- ({360/\n * (\s - 1)}:\radius * 1.75);
+
+\def \s {2}
+  \draw[dashed,<-, >=latex] ({360/\n * (\s - 1)+\margin}:\radius)
+    arc ({360/\n * (\s - 1)+\margin}:{360/\n * (\s)-\margin}:\radius);
+\def \s {6}
+  \draw[dashed,<-, >=latex] ({360/\n * (\s - 1)+\margin}:\radius)
+    arc ({360/\n * (\s - 1)+\margin}:{360/\n * (\s)-\margin}:\radius);
+
+\foreach \s in {2,3,6,7}
+{
+  \node[draw, circle] at ({360/\n * (\s - 1)}:\radius) {\text{}};
+}
+\foreach \s in {1,3,4,5,7}
+{
+  \draw[<-, >=latex] ({360/\n * (\s - 1)+\margin}:\radius)
+    arc ({360/\n * (\s - 1)+\margin}:{360/\n * (\s)-\margin}:\radius);
+}
+\end{tikzpicture}
+\caption{Diagram illustrating a cycle $C$ in $G$}
+\end{figure}
+
+\begin{comment}
+($\Longleftarrow$) When following edge $(v,u)$, the son following the ``cycle searching principle'' always visits all the neighbours of $u$ in sequential order before going back through $(u,v)$. Therefore if the vertex $v$ is the root of a tree (acyclic graph) the son will perform a tree traversal, coming back along an edge only if the subtree has been been entirely visited. In the case that there is a cycle containing $v$, $u$ and $w$ where $(v,u),(v,w)\in E$, the son will eventually be brought to $v$ by his father. The son will leave $v$ through the edge $(v,u)$ and eventually reach $w$. At that point he will re-enter $v$ and the cycle will be detected.
+\end{comment}
 \end{proof}
 
 The algorithm only needs to store a constant amount of vertex indices:
