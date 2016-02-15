@@ -29,9 +29,9 @@
 \pagenumbering{gobble}
 \maketitle
 
-\begin{enumerate}
+\section{Logspace closed under composition}
 
-\item Here we assume that by log-space computable functions, we mean functions which can be computed by a log-space transducer, that is a TM with a read-only input tape, a log-space bounded work tape and a write-only output tape.
+Here we assume that by log-space computable functions, we mean functions which can be computed by a log-space transducer, that is a TM with a read-only input tape, a log-space bounded work tape and a write-only output tape.
 
 \begin{theorem}If both $f$ and $g$ are computable in logarithmic space, $f \circ g$ is also computable in logarithmic space.
 \end{theorem}
@@ -48,7 +48,9 @@ Assuming that the log-space transducer outputs 1 symbol at every step of its run
 \end{proof}
 
 \newpage
-\item The key intuition here is to realize that the son's future \textbf{and} past behaviour is entirely determined by the current edge (and direction) that he is following. With this insight, we can show that he cannot enter a cycle and get stuck in it unless he was spawned in it by his father. This is then used to show that the son always returns to his initial spawn vertex in finite time. Termination follows from that naturally while correctness requires some more detailed case analysis.
+\section{Cycle searching principle}
+
+The key intuition here is to realize that the son's future \textbf{and} past behaviour is entirely determined by the current edge (and direction) that he is following. With this insight, we can show that he cannot enter a cycle and get stuck in it unless he was spawned in it by his father. This is then used to show that the son always returns to his initial spawn vertex in finite time. Termination follows from that naturally while correctness requires some more detailed case analysis.
 
 \begin{lemma}\label{lemma_deter}
 Let $(v,w)\in E$, $(u_1,v,w)$ and $(u_2,v,w)$ be two paths followed by the son at some point during the execution of the algorithm. We claim that $u_1=u_2$.
@@ -152,8 +154,12 @@ The algorithm only needs to store a constant amount of vertex indices:
 \end{itemize}
 Therefore the space complexity is $O(\log |V|)$.
 
+Also worth noting is that this graph works for both connected and disconnected graphs.
+
 \newpage
-\item First we note that the description of a symmetric boolean function $f:\{0,1\}^n\rightarrow \{0,1\}$ is basically a mapping $m:\{0,1,\dotsc,n\}\rightarrow \{0,1\}$.
+\section{Boolean symmetric functions $\rightarrow$ MAJ $\circ$ MAJ}
+
+First we note that the description of a symmetric boolean function $f:\{0,1\}^n\rightarrow \{0,1\}$ is basically a mapping $m:\{0,1,\dotsc,n\}\rightarrow \{0,1\}$.
 
 Next, we introduce a new type of gate MAJ$_{\geq i}$ constructed from a single MAJ gate that returns 1 when $i$ or more of its $n$ input wires are 1, and 0 otherwise. To construct it, we feed all $n$ inputs into a MAJ gate. We also add $i$ 0-constant inputs and $n-i+1$ 1-constant inputs for a total of $2n+1$ inputs. Therefore the MAJ gate will output 1 when:
 \begin{align*}
@@ -204,10 +210,9 @@ In order to show that this indeed computes $f$, let's perform a case analysis on
 Note that this also creates a circuit of linear size, since $f(i)=1$ for at most $n$ values and that in each of those cases we add 2 MAJ gates. This completes the construction of a linear-size MAJ $\circ$ MAJ circuit computing a symmetric boolean function. 
 
 \newpage
-\item %todo
+\section{Polysize circuits $\rightarrow$ NC\textsuperscript{1}}
 
 \newpage
-\item %todo
+\section{Introduction}
 
-\end{enumerate}
 \end{document}
