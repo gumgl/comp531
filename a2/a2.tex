@@ -162,6 +162,7 @@ The algorithm only needs to store a constant amount of vertex indices:
 Therefore the space complexity is $O(\log |V|)$.
 Also worth noting is that this algorithm works for both connected and disconnected graphs.
 
+
 \section{Boolean symmetric functions $\rightarrow$ MAJ $\circ$ MAJ}
 
 First we note that the description of a symmetric boolean function $f:\{0,1\}^n\rightarrow \{0,1\}$ is basically a mapping $m:\{0,1,\dotsc,n\}\rightarrow \{0,1\}$.
@@ -239,7 +240,11 @@ We now construct a new circuit equivalent to our original as shown in figure \re
 
 The result of this transformation is shown in figure \ref{fig:transformed}. Once this is done, we recursively apply this transformation on all the subtrees rooted at level 3 nodes of our new circuit. The recursion stops once we reach subtrees of size 1.
 
-\begin{figure}[!h]
+In order to show that this indeed creates a tree of depth $O(\log n)$, realize that one recursion step only adds a constant (2) depth to the newly created tree so far. Also note that the recursion is done on subtrees that are at most $\sfrac{2}{3}$ the size of the original tree. Therefore in the worst case, we have $\log_{\sfrac{3}{2}}(s)=O(\log n^k)=O(k\log(n))$. Therefore the depth of our final tree has depth logarithmic in the number of inputs.
+
+In order for the transformed circuit to be in $NC^1$ we must also show that its size is polynomial. At every step of the recursion, we add a constant amount of gates and we also duplicate the subtrees without altering their number of gates. We therefore double the amount of gates at each step. Since there are $O(\log n)$ steps, we multiply the number of gates by a factor of $2^{\log n}=n$. Therefore this only increases the degree of the polynomial by 1 which is still a polynomial amount of gates in terms of the number of inputs $n$.
+
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[sibling distance=3em, level distance=3em,
   every node/.style = {shape=circle, rounded corners,
@@ -261,7 +266,7 @@ The result of this transformation is shown in figure \ref{fig:transformed}. Once
 \label{fig:original}
 \end{figure}
 
-\begin{figure}[!h]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[level distance=3em,
   level 1/.style={sibling distance=18em},
@@ -280,22 +285,41 @@ The result of this transformation is shown in figure \ref{fig:transformed}. Once
 \label{fig:transformed}
 \end{figure}
 
-In order to show that this indeed creates a tree of depth $O(\log n)$, realize that one recursion step only adds a constant (2) depth to the newly created tree so far. Also note that the recursion is done on subtrees that are at most $\sfrac{2}{3}$ the size of the original tree. Therefore in the worst case, we have $\log_{\sfrac{3}{2}}(s)=O(\log n^k)=O(k\log(n))$. Therefore the depth of our final tree has depth logarithmic in the number of inputs.
-
-In order for the transformed circuit to be in $NC^1$ we must also show that its size is polynomial. At every step of the recursion, we add a constant amount of gates and we also duplicate the subtrees without altering their number of gates. We therefore double the amount of gates at each step. Since there are $O(\log n)$ steps, we multiply the number of gates by a factor of $2^{\log n}=n$. Therefore this only increases the degree of the polynomial by 1 which is still a polynomial amount of gates in terms of the number of inputs $n$.
-
 \begin{lemma}\label{lemma:subtree}
-Given a tree of size $s$ with root node $u$, there is a node $v$ whose subtree is of size $t$ where $\frac{1}{3}s\leq t \leq \frac{2}{3}s$
+Given a tree $T$ of size $s$ with root node $u$, there is a node $v \in T$ whose subtree is of size $t$ where $\frac{1}{3}s\leq t \leq \frac{2}{3}s$
 \end{lemma}
 \begin{proof}
-If either the immediate left or right child of $u$ is a subtree size $t$, then we have found $v$. Otherwise, recurse on the child whose subtree is bigger. Because each recursion step reduces the size of the tree by at least one, we are guaranteed to find such $v$.
+If either the immediate left or right child of $u$ is a subtree of size $t$, then we have found $v$. Otherwise, recurse on the child whose subtree is bigger. Because each recursion step reduces the size of the tree by at least 1, we are guaranteed to find such $v$.
 \end{proof}
 
-% into constant-height to reduce their heights by a constant factor. We then apply the same .
-
+\newpage
 \section{$w$-parity}
 
-Left blank due to lack of time.
-%Sadly I have a MATH-340 assignment worth as much as question 5 due the next day at 8:30am. I do not have enough time to complete this question.
+First, we will show that an $\omega$-parity function cannot be computed by a circuit $C$ of countable size and depth $d \leq 2$. We will restrict ourselves with circuits following these conventions:
+\begin{itemize}
+\item each level takes as inputs the outputs of gates at the previous level
+\item each level contains only one single type of gates
+\item the types of gates \{AND, OR\} alternate between levels
+\item circuits do not contain negation gates, but use negated input variables
+\end{itemize}
+As seen in class, for a circuit of depth $d$ this only increases the amount of gates by a factor of $d$.
+
+For $d=1$, the circuit can only contain one gate, the output gate. Clearly, a single AND or OR gate cannot compute $\omega$-parity (consider the two possible types of that gate to convince yourself). For $d=2$, according to our convention the circuit represents either a CNF or a DNF formula.
+
+For any circuit $C_n$ in CNF (AND of ORs):
+\begin{itemize}
+\item All terms depend on all $n$ variables. Suppose there is a term $t$ that does not depend on $x_i$. If all inputs to $t$ are 0, then $t$ will return 0 and the top-level AND gate will also return 0. But in this case, flipping the value of $x_i$ will not change the output of $C$. Therefore such a term $t$ does not exist.
+\item There are $2^{n-1}$ terms. $C$ must return 0 for $2^{n-1}$ different inputs. Since each term returns 0 on one setting of the input variables and one term returning 0 is all that's needed for $C$ to return 0, there must be at least $2^{n-1}$ term.
+\end{itemize}
+
+For any circuit $C_n$ in DNF (OR of ANDs):
+\begin{itemize}
+\item All terms depend on all $n$ variables. Suppose there is a term $t$ that does not depend on $x_i$. If all inputs to $t$ are 1, then $t$ will return 1 and the top-level OR gate will also return 1. But in this case, flipping the value of $x_i$ will not change the output of $C$. Therefore such a term $t$ does not exist.
+\item There are $2^{n-1}$ terms. $C$ must return 1 for $2^{n-1}$ different inputs. Since each term returns 1 on one setting of the input variables and one term returning 1 is all that's needed for $C$ to return 1, there must be at least $2^{n-1}$ term.
+\end{itemize}
+
+Therefore we see that for circuits of depth $d \leq 2$ computing a $\omega$-parity function, their size is $O(2^\omega)$ which is not countable.
+
+For $d \geq 3$, assume the circuit has OR gates at level 1 (WLOG). As seen in class in the proof that PARITY $\not\in AC^0$, we can create a restriction $\rho$ that will remove all infinite fan-in OR gates at level 1. We can then similarly create another restriction $\pi$ to remove level 2 infinite AND gates. Once this is done, we can convert the first two levels from DNF (OR of ANDs) to CNF (AND of ORs). Then we can merge levels 2 and 3 which are both made up of OR gates into a single level. We can then apply the induction hypothesis on a circuit with smaller depth.
 
 \end{document}
