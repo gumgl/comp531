@@ -1,0 +1,84 @@
+\documentclass{article}
+
+\usepackage{mathtools}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{float}
+\usepackage{verbatim}
+\usepackage{graphicx}
+\usepackage{amsthm}
+\usepackage{xfrac}
+\usepackage{tikz} % oh ho...
+%\usepackage{svg} % I gave up...
+
+\restylefloat{table}
+\setlength{\parindent}{0pt}
+
+\author{Guillaume Labranche (260585371)}
+\title{COMP 531 -- Advanced Theory of Computation\\Assignment \#4}
+\date{due on 30 March 2016}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\pA}{Player 1 }
+\newcommand{\pB}{Player 2 }
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+%\newcommand{-->}{\rightarrow} %does not work :(
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+
+\newenvironment{definition}[1][Definition.]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+\begin{document}
+
+
+%\pagenumbering{gobble}
+\maketitle
+
+\section*{3. Disjunction of sets of naturals}
+First, we define a \textit{fooling set} for a function $f$ as a subset $F \subseteq X \times Y$ such that for any distinct pair $(x_1, y_1),(x_2, y_2) \in F$:
+\begin{enumerate}
+\item $f(x_1,y_1)=f(x_2,y_2)$
+\item $f(x_1, y_2)\not=f(x_1,y_1)$ or $f(x_2, y_1)\not=f(x_1,y_1)$.
+\end{enumerate}
+
+Note that every $f$-monochromatic rectangle contains at most one element in $F$.
+
+Take a set $F = \big\{(S,S^c) : S \subseteq \{1,\dotsc,n\}\big\}$. $F$ is a fooling set for $DISJ$:
+
+\begin{enumerate}
+\item $\forall S \in F, DISJ(S,S^c)=1$
+\item for $S \not= T$, either $S \cap T^c \not= \emptyset$ or $T \cap S^c \not= \emptyset$ or both.
+\end{enumerate}
+Since all inputs in $F$ return 1, there must be at least one rectangle that returns 0. Since $|F|=2^n$, the minimum \# of monochromatic rectangles in a disjoint cover of $X \times Y$ is $2^n+1$. Using the lemma seen in class, we conclude that $D(DISJ) \geq \ceil{\log(2^n+1)} \geq n+1$.
+
+The naive protocol sends $x$ (of length $n$) to the other party, who then computes $f(x,y)$ and returns the value (of length 1). The naive protocol has cost $n+1$ and therefore $D(DISJ) \leq n+1$.
+
+Therefore $D(DISJ) = n+1$.
+
+\newpage
+\section*{4. Intersection of a clique and an independent set}
+Here is a protocol with a total communication cost of $O(\log^2 n)$. Note that we use the word \textit{return} to indicate that the protocol ends and whoever declares the $f$-value sends it to the other player so they get it too (cost of 1 bit).
+
+Follow these steps procedurally: 
+\begin{enumerate}
+\item If $\exists v \in C : deg(v) < \frac{n}{2}$:
+\begin{enumerate}
+\item \pA sends $v$ to \pB ($\log n$ bits)
+\item \pB can then check whether $v \in I$. If it is, return 1 and communicates it to \pA too (1 bit).
+\item Otherwise, repeat this entire protocol on $H = \{u : u=v \text{ or } (u,v) \in E(G)\} \subseteq G$ (i.e. the closed neighbourhood of $v$). Note that $|V(H)|\leq \frac{1}{2}|V(G)|$ and $C \cap I \subseteq C \subseteq H$. Therefore recursing on $H$ will find the vertex in $C \cap I$ if it exists.
+\end{enumerate}
+\item Else if $\exists v \in I : deg(v) \geq \frac{n}{2}$:
+\begin{enumerate}
+\item \pB sends $v$ to \pA ($\log n$ bits)
+\item \pA can then check whether $v \in C$. If it is, return 1 and communicates it to \pB (1 bit).
+\item Otherwise, repeat this entire protocol on $H = \{u : u=v \text{ or } (u,v) \not\in E(G)\} \subseteq G$ (i.e. $v$ and its non-neighbours). Note that $|V(H)|\leq \frac{1}{2}|V(G)|$ and $C \cap I \subseteq I \subseteq H$. Therefore recursing on $H$ will find the vertex in $C \cap I$ if it exists.
+\end{enumerate}
+\item Else, \pB returns 1 and communicates it to \pA (1 bit). This is because this step is only reached if all nodes in $C$ have degree $<\frac{n}{2}$ and all nodes in $I$ have degree $\geq\frac{n}{2}$ meaning that $C$ and $I$ are disjoint.
+\end{enumerate}
+
+Since every recursion step cuts the input size in half, there will be at most $\log n$ recursion steps, who each send $O(\log n)$ bits. Therefore the communication complexity of this function is $O(\log^2 n)$.
+
+\end{document}
